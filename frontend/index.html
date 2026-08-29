@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Intelligence Platform - SIH PS 26101</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #d946ef 100%); }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; }
+        .btn-primary { background: #0284c7; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; }
+        .btn-primary:hover { background: #0369a1; }
+        .btn-secondary { background: #e5e7eb; color: #374151; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; }
+        .input-field { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; outline: none; }
+        .input-field:focus { ring: 2px; border-color: #0ea5e9; }
+        .stat-card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #4b5563; border-radius: 0.5rem; text-decoration: none; }
+        .sidebar-link:hover, .sidebar-link.active { background: #e0f2fe; color: #0369a1; }
+        .skill-tag { display: inline-block; padding: 0.25rem 0.75rem; background: #e0f2fe; color: #0369a1; border-radius: 9999px; font-size: 0.75rem; }
+        .priority-high { background: #fecaca; color: #dc2626; }
+        .priority-medium { background: #fed7aa; color: #ea580c; }
+        .priority-low { background: #bbf7d0; color: #16a34a; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-cyan-700">Skill Platform</h1>
+                <p class="text-xs text-gray-500 mt-1">SIH PS 26101 - MoSPI</p>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" class="sidebar-link active" onclick="showPage('dashboard')">📊 Dashboard</a>
+                <a href="#" class="sidebar-link" onclick="showPage('competency')">🎯 Competency</a>
+                <a href="#" class="sidebar-link" onclick="showPage('quiz')">📝 Quiz Builder</a>
+                <a href="#" class="sidebar-link" onclick="showPage('learning')">🗺️ Learning Path</a>
+                <a href="#" class="sidebar-link" onclick="showPage('courses')">📚 iGOT Courses</a>
+                <a href="#" class="sidebar-link" onclick="showPage('admin')">⚙️ Admin Dashboard</a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                        <span class="text-cyan-700 font-medium">D</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Demo User</p>
+                        <p class="text-xs text-gray-500">Under Secretary</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <div class="p-8">
+                <!-- Dashboard Page -->
+                <div id="page-dashboard" class="page">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Welcome, Demo User!</h1>
+                    <p class="text-gray-500 mb-6">Under Secretary • MoSPI</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="stat-card">
+                            <p class="text-sm text-gray-500">Overall Score</p>
+                            <p class="text-2xl font-bold text-cyan-600">3.2</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm text-gray-500">Skills Assessed</p>
+                            <p class="text-2xl font-bold text-fuchsia-600">12</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm text-gray-500">Quiz Average</p>
+                            <p class="text-2xl font-bold text-green-600">72.5%</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm text-gray-500">Courses Enrolled</p>
+                            <p class="text-2xl font-bold text-orange-600">3</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4">Top Skills</h3>
+                            <canvas id="skillsChart" height="200"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4">Areas for Improvement</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="font-medium">Machine Learning</span>
+                                    <span class="priority-high px-2 py-1 rounded text-xs font-medium">Gap: 2.5</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="font-medium">Cloud Computing</span>
+                                    <span class="priority-medium px-2 py-1 rounded text-xs font-medium">Gap: 1.8</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="font-medium">GIS</span>
+                                    <span class="priority-medium px-2 py-1 rounded text-xs font-medium">Gap: 1.5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <a href="#" class="card hover:shadow-md cursor-pointer" onclick="showPage('competency')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center text-2xl">🎯</div>
+                                <div>
+                                    <h4 class="font-semibold">Take Assessment</h4>
+                                    <p class="text-sm text-gray-500">Evaluate your skills</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="card hover:shadow-md cursor-pointer" onclick="showPage('quiz')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-fuchsia-100 rounded-lg flex items-center justify-center text-2xl">📝</div>
+                                <div>
+                                    <h4 class="font-semibold">Generate Quiz</h4>
+                                    <p class="text-sm text-gray-500">Practice with AI quizzes</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="card hover:shadow-md cursor-pointer" onclick="showPage('learning')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl">🗺️</div>
+                                <div>
+                                    <h4 class="font-semibold">View Learning Path</h4>
+                                    <p class="text-sm text-gray-500">See recommended courses</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Competency Page -->
+                <div id="page-competency" class="page hidden">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Competency Assessment</h1>
+                    <p class="text-gray-500 mb-6">Select your skills and run assessment</p>
+                    
+                    <div class="card mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Select Your Skills</h3>
+                        <div id="skillButtons" class="flex flex-wrap gap-2 mb-4"></div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Years of Experience: <span id="expValue">5</span></label>
+                            <input type="range" id="experience" min="0" max="30" value="5" class="w-full" oninput="document.getElementById('expValue').textContent=this.value">
+                        </div>
+                        
+                        <button onclick="runAssessment()" class="btn-primary">Run Assessment</button>
+                    </div>
+
+                    <div id="assessmentResult" class="hidden">
+                        <div class="card mb-6">
+                            <h3 class="text-lg font-semibold mb-4">Overall Competency Score</h3>
+                            <p id="overallScore" class="text-5xl font-bold text-cyan-600"></p>
+                        </div>
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4">Skill Gaps Identified</h3>
+                            <div id="skillGaps" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Page -->
+                <div id="page-quiz" class="page hidden">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Quiz Builder</h1>
+                    <p class="text-gray-500 mb-6">Generate AI-powered quizzes</p>
+                    
+                    <div class="card mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Enter Content</h3>
+                        <textarea id="quizContent" class="input-field h-32 mb-4" placeholder="Paste your learning material here..."></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Questions</label>
+                                <select id="numQuestions" class="input-field">
+                                    <option value="3">3 Questions</option>
+                                    <option value="5" selected>5 Questions</option>
+                                    <option value="10">10 Questions</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Difficulty</label>
+                                <select id="difficulty" class="input-field">
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button onclick="generateQuiz()" class="btn-primary">Generate Quiz</button>
+                    </div>
+
+                    <div id="quizContainer" class="hidden">
+                        <div class="card">
+                            <h3 id="quizTitle" class="text-lg font-semibold mb-4"></h3>
+                            <div id="quizQuestions" class="space-y-4"></div>
+                            <button onclick="submitQuiz()" class="btn-primary mt-6">Submit Quiz</button>
+                        </div>
+                    </div>
+
+                    <div id="quizResults" class="hidden mt-6">
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4">Quiz Results</h3>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-sm text-gray-500">Score</p>
+                                    <p id="quizScore" class="text-3xl font-bold text-cyan-600"></p>
+                                </div>
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-sm text-gray-500">Correct</p>
+                                    <p id="quizCorrect" class="text-3xl font-bold text-green-600"></p>
+                                </div>
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-sm text-gray-500">Grade</p>
+                                    <p id="quizGrade" class="text-3xl font-bold text-fuchsia-600"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Path Page -->
+                <div id="page-learning" class="page hidden">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Learning Path</h1>
+                    <p class="text-gray-500 mb-6">Personalized course recommendations</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="stat-card"><p class="text-sm text-gray-500">Total Courses</p><p class="text-2xl font-bold text-cyan-600">5</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-500">Duration</p><p class="text-2xl font-bold text-fuchsia-600">12 hrs</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-500">Completion</p><p class="text-2xl font-bold text-green-600">30 days</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-500">Skill Gaps</p><p class="text-2xl font-bold text-orange-600">3</p></div>
+                    </div>
+
+                    <div class="card mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Recommended Courses</h3>
+                        <div id="recommendedCourses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+
+                <!-- iGOT Courses Page -->
+                <div id="page-courses" class="page hidden">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">iGOT Karmayogi Courses</h1>
+                    <p class="text-gray-500 mb-6">Explore courses from the iGOT platform</p>
+                    
+                    <div class="card mb-6">
+                        <div class="flex gap-2 mb-4">
+                            <button onclick="filterCourses('all')" class="px-4 py-2 rounded-lg text-sm font-medium bg-cyan-600 text-white">All</button>
+                            <button onclick="filterCourses('technical')" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100">Technical</button>
+                            <button onclick="filterCourses('statistical')" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100">Statistical</button>
+                            <button onclick="filterCourses('behavioural')" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100">Behavioural</button>
+                        </div>
+                        <div id="allCourses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard Page -->
+                <div id="page-admin" class="page hidden">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+                    <p class="text-gray-500 mb-6">Organization-wide analytics</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="stat-card"><p class="text-sm text-gray-500">Total Users</p><p class="text-2xl font-bold text-cyan-600">156</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-500">Avg Competency</p><p class="text-2xl font-bold text-fuchsia-600">3.1</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-500">Quiz Attempts</p><p class="text-2xl font-bold text-green-600">423</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-500">Courses Completed</p><p class="text-2xl font-bold text-orange-600">145</p></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4">Category Performance</h3>
+                            <canvas id="categoryChart" height="200"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="text-lg font-semibold mb-4">Predictive Insights</h3>
+                            <div class="p-4 bg-cyan-50 rounded-lg mb-4">
+                                <h4 class="font-medium text-cyan-700 mb-2">Skills in Demand</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="skill-tag">AI/ML</span>
+                                    <span class="skill-tag">Data Visualization</span>
+                                    <span class="skill-tag">Cloud Computing</span>
+                                    <span class="skill-tag">Python</span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-fuchsia-50 rounded-lg">
+                                <h4 class="font-medium text-fuchsia-700 mb-2">Projected Growth</h4>
+                                <p class="text-fuchsia-600">15% improvement expected in next quarter</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4">Recent Users</h3>
+                        <table class="w-full">
+                            <thead><tr class="border-b border-gray-200"><th class="text-left py-3 font-medium text-gray-600">Name</th><th class="text-left py-3 font-medium text-gray-600">Department</th><th class="text-left py-3 font-medium text-gray-600">Joined</th></tr></thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100"><td class="py-3">Rajesh Kumar</td><td class="py-3">NSSO</td><td class="py-3">2026-08-25</td></tr>
+                                <tr class="border-b border-gray-100"><td class="py-3">Priya Sharma</td><td class="py-3">CSO</td><td class="py-3">2026-08-24</td></tr>
+                                <tr class="border-b border-gray-100"><td class="py-3">Amit Patel</td><td class="py-3">MoSPI</td><td class="py-3">2026-08-23</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API = 'http://localhost:8000';
+        let selectedSkills = [];
+        let currentQuiz = null;
+        let userAnswers = {};
+        let allCourses = [];
+
+        // Skills by category
+        const skills = {
+            statistical: ['Survey Design', 'Sampling Methods', 'National Accounts', 'Price Statistics', 'Labour Statistics'],
+            technical: ['Python', 'R', 'SQL', 'Data Visualization', 'AI/ML', 'Cloud Computing', 'GIS'],
+            digital_governance: ['Cybersecurity', 'Data Privacy', 'Digital Signatures'],
+            behavioural: ['Leadership', 'Communication', 'Project Management', 'Ethics']
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSkillButtons();
+            loadCourses();
+            initCharts();
+        });
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${page}`).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (page === 'courses') loadCourses();
+            if (page === 'learning') loadRecommendedCourses();
+        }
+
+        function loadSkillButtons() {
+            const container = document.getElementById('skillButtons');
+            let html = '';
+            for (const [cat, skillList] of Object.entries(skills)) {
+                html += `<div class="w-full mb-2"><span class="text-sm font-medium text-gray-600 capitalize">${cat.replace('_', ' ')}:</span></div>`;
+                skillList.forEach(skill => {
+                    html += `<button onclick="toggleSkill('${skill}')" id="skill-${skill.replace(/[^a-zA-Z]/g, '')}" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">${skill}</button>`;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        function toggleSkill(skill) {
+            const idx = selectedSkills.indexOf(skill);
+            if (idx > -1) {
+                selectedSkills.splice(idx, 1);
+                document.getElementById(`skill-${skill.replace(/[^a-zA-Z]/g, '')}`).classList.remove('bg-cyan-600', 'text-white');
+                document.getElementById(`skill-${skill.replace(/[^a-zA-Z]/g, '')}`).classList.add('bg-gray-100');
+            } else {
+                selectedSkills.push(skill);
+                document.getElementById(`skill-${skill.replace(/[^a-zA-Z]/g, '')}`).classList.add('bg-cyan-600', 'text-white');
+                document.getElementById(`skill-${skill.replace(/[^a-zA-Z]/g, '')}`).classList.remove('bg-gray-100');
+            }
+        }
+
+        async function runAssessment() {
+            if (selectedSkills.length === 0) {
+                alert('Please select at least one skill');
+                return;
+            }
+            const experience = parseInt(document.getElementById('experience').value);
+            const res = await fetch(`${API}/api/competency/assess`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ skills: selectedSkills, experience })
+            });
+            const data = await res.json();
+            
+            document.getElementById('assessmentResult').classList.remove('hidden');
+            document.getElementById('overallScore').textContent = data.overall_score.toFixed(1);
+            
+            let gapsHtml = '';
+            data.skill_gaps.slice(0, 8).forEach(gap => {
+                const priorityClass = gap.priority === 'high' ? 'priority-high' : gap.priority === 'medium' ? 'priority-medium' : 'priority-low';
+                gapsHtml += `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-medium">${gap.skill}</span>
+                            <div class="text-sm text-gray-500">Current: ${gap.current_level} → Target: ${gap.target_level}</div>
+                        </div>
+                        <span class="${priorityClass} px-2 py-1 rounded text-xs font-medium">${gap.priority}</span>
+                    </div>`;
+            });
+            document.getElementById('skillGaps').innerHTML = gapsHtml;
+        }
+
+        async function generateQuiz() {
+            const text = document.getElementById('quizContent').value;
+            if (!text) {
+                alert('Please enter some content');
+                return;
+            }
+            const numQ = parseInt(document.getElementById('numQuestions').value);
+            const diff = document.getElementById('difficulty').value;
+            
+            const res = await fetch(`${API}/api/quiz/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, num_questions: numQ, difficulty: diff })
+            });
+            currentQuiz = await res.json();
+            userAnswers = {};
+            
+            document.getElementById('quizContainer').classList.remove('hidden');
+            document.getElementById('quizResults').classList.add('hidden');
+            document.getElementById('quizTitle').textContent = currentQuiz.title;
+            
+            let html = '';
+            currentQuiz.questions.forEach(q => {
+                html += `
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="font-medium mb-3">Q${q.id}: ${q.question}</p>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, i) => `
+                                <label class="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-cyan-50">
+                                    <input type="radio" name="q${q.id}" value="${String.fromCharCode(65+i)}" onchange="userAnswers[${q.id}]='${String.fromCharCode(65+i)}'">
+                                    <span>${String.fromCharCode(65+i)}. ${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('quizQuestions').innerHTML = html;
+        }
+
+        async function submitQuiz() {
+            if (!currentQuiz) return;
+            const res = await fetch(`${API}/api/quiz/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quiz_id: currentQuiz.id, answers: userAnswers })
+            });
+            const result = await res.json();
+            
+            document.getElementById('quizResults').classList.remove('hidden');
+            document.getElementById('quizScore').textContent = result.score + '%';
+            document.getElementById('quizCorrect').textContent = result.correct_count + '/' + result.total_questions;
+            document.getElementById('quizGrade').textContent = result.grade;
+        }
+
+        async function loadCourses() {
+            const res = await fetch(`${API}/api/igot/courses`);
+            const data = await res.json();
+            allCourses = data.courses;
+            renderCourses(allCourses);
+        }
+
+        function filterCourses(category) {
+            if (category === 'all') {
+                renderCourses(allCourses);
+            } else {
+                renderCourses(allCourses.filter(c => c.category === category));
+            }
+        }
+
+        function renderCourses(courses) {
+            let html = '';
+            courses.forEach(c => {
+                html += `
+                    <div class="p-4 border border-gray-200 rounded-lg hover:border-cyan-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">${c.category}</span>
+                            <span class="px-2 py-1 ${c.difficulty==='beginner'?'bg-green-100 text-green-700':c.difficulty==='intermediate'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'} rounded text-xs">${c.difficulty}</span>
+                        </div>
+                        <h4 class="font-medium mb-2">${c.title}</h4>
+                        <p class="text-sm text-gray-500 mb-3">⏱️ ${c.duration} min</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                        </div>
+                        <button onclick="enrollCourse('${c.id}')" class="w-full btn-primary text-sm py-2">Enroll</button>
+                    </div>`;
+            });
+            document.getElementById('allCourses').innerHTML = html;
+        }
+
+        async function loadRecommendedCourses() {
+            const res = await fetch(`${API}/api/recommendation/learning-path`);
+            const data = await res.json();
+            
+            let html = '';
+            data.recommended_courses.forEach(c => {
+                html += `
+                    <div class="p-4 border-2 border-cyan-200 bg-cyan-50 rounded-lg">
+                        <span class="px-2 py-1 bg-cyan-600 text-white rounded text-xs font-medium">Recommended</span>
+                        <h4 class="font-medium mt-2 mb-2">${c.title}</h4>
+                        <p class="text-sm text-gray-500 mb-3">⏱️ ${c.duration} min</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                        </div>
+                        <a href="${c.url}" target="_blank" class="block text-center py-2 bg-cyan-600 text-white rounded-lg text-sm">View on iGOT</a>
+                    </div>`;
+            });
+            document.getElementById('recommendedCourses').innerHTML = html;
+        }
+
+        function enrollCourse(id) {
+            alert(`Enrolled in course ${id}! (Demo mode)`);
+        }
+
+        function initCharts() {
+            // Skills Chart
+            new Chart(document.getElementById('skillsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['SQL', 'Python', 'Survey Design', 'Communication', 'Data Analysis'],
+                    datasets: [{
+                        label: 'Skill Level',
+                        data: [4.0, 3.5, 3.2, 3.0, 2.8],
+                        backgroundColor: '#0ea5e9'
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+
+            // Category Chart
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Statistical', 'Technical', 'Digital Gov', 'Behavioural'],
+                    datasets: [{
+                        label: 'Avg Level',
+                        data: [3.2, 2.8, 2.5, 3.5],
+                        backgroundColor: ['#0ea5e9', '#d946ef', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+</html>
