@@ -103,7 +103,7 @@ async def get_admin_dashboard(
     
     enrollment_stats = db.query(
         func.count(CourseEnrollment.id),
-        func.count(CourseEnrollment.id.filter(CourseEnrollment.status == "completed"))
+        func.count(CourseEnrollment.id).filter(CourseEnrollment.status == "completed")
     ).first()
     
     recent_users = db.query(User).order_by(User.created_at.desc()).limit(10).all()
@@ -148,9 +148,9 @@ async def get_analytics(
     db: Session = Depends(get_db)
 ):
     monthly_enrollments = db.query(
-        func.date_trunc('month', CourseEnrollment.enrolled_at),
+        func.strftime('%Y-%m', CourseEnrollment.enrolled_at),
         func.count(CourseEnrollment.id)
-    ).group_by(func.date_trunc('month', CourseEnrollment.enrolled_at)).all()
+    ).group_by(func.strftime('%Y-%m', CourseEnrollment.enrolled_at)).all()
     
     competency_trends = db.query(
         UserCompetency.skill_name,

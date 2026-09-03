@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from jose import JWTError, jwt

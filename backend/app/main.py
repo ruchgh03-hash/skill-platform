@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from app.api import auth, competency, quiz, recommendation, dashboard, igot
-from app.models.database import engine, Base
+from app.models.database import init_db
 from app.services.ml_loader import MLModels
 
 load_dotenv()
@@ -14,10 +14,12 @@ ml_models = MLModels()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    ml_models.load_all()
+    init_db()
+    try:
+        ml_models.load_all()
+    except Exception as e:
+        print(f"Warning: ML models failed to load: {e}")
     yield
-    # Shutdown
     ml_models.unload_all()
 
 app = FastAPI(
@@ -27,9 +29,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# CORS configuration
+FRONTEND_HOST = os.getenv("FRONTEND_HOST", "http://localhost:5173")
+ALLOWED_ORIGINS = [origin.strip() for origin in FRONTEND_HOST.split(",") if origin.strip()]
+ALLOWED_ORIGINS.append("http://localhost:5173")
+ALLOWED_ORIGINS.append("http://localhost:8000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

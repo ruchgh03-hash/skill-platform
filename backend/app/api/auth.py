@@ -6,13 +6,14 @@ from typing import Optional
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+import os
 
 from ..models.database import get_db
 from ..models.models import User, UserProfile
 
 router = APIRouter()
 
-SECRET_KEY = "your-secret-key-change-in-production"
+SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
