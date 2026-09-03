@@ -1,14 +1,24 @@
+# Render / Railway Blueprint - SkillPlatform SIH PS 26101
+# This config works for Render (free tier) and Railway (free tier)
+
 services:
 
   # ==================== BACKEND API (FastAPI - Demo Mode) ====================
   - type: web
     name: skill-platform-api
     runtime: python
-    buildCommand: pip install fastapi uvicorn pydantic python-jose passlib python-multipart && python -m spacy download en_core_web_sm
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app_demo:app --host 0.0.0.0 --port $PORT
     plan: free
     region: oregon
     healthCheckPath: /health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.11"
 
   # ==================== FRONTEND (React/Vite Static Site) ====================
   - type: static_site
@@ -21,3 +31,9 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: skill-platform-api
+          property: url
