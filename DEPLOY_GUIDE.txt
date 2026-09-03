@@ -1,0 +1,91 @@
+🚀 SkillPlatform SIH PS 26101 - Render Deployment Guide
+================================================================
+
+📁 Your Code: https://github.com/ruchgh03-hash/skill-platform
+📁 Blueprint: render.yaml (simplified - works with Render)
+
+================================================================
+STEP 1: Create Render Services
+================================================================
+
+1. Go to: https://render.com/dashboard
+2. Click: New + → Blueprint
+3. Connect your GitHub account
+4. Select repo: ruchgh03-hash/skill-platform
+5. Click "Create new service from blueprint"
+
+⚠️ IMPORTANT: When prompted for services, create these 2:
+
+Service 1: Web Service (Backend)
+- Name: skill-platform-api
+- Runtime: Python
+- Build Command: pip install fastapi uvicorn pydantic python-jose passlib python-multipart && python -m spacy download en_core_web_sm
+- Start Command: uvicorn app_demo:app --host 0.0.0.0 --port $PORT
+- Plan: Free
+
+Service 2: Static Site (Frontend)
+- Name: skill-platform-frontend
+- Build Command: npm install && npm run build
+- Plan: Free
+
+================================================================
+STEP 2: Add PostgreSQL Database
+================================================================
+
+After services create:
+
+1. Go to skill-platform-db (or click "New +" → Postgres)
+2. Name: skill-platform-db
+3. Plan: Free
+4. Region: Oregon
+5. Click "Create Postgres"
+
+⚠️ Note: PostgreSQL is NOT in the Blueprint YAML - add it manually from the dashboard.
+
+================================================================
+STEP 3: Set Environment Variables
+================================================================
+
+For Frontend (skill-platform-frontend):
+
+1. Go to skill-platform-frontend → Environment
+2. Click "Add Variable"
+3. Enter:
+   Key: VITE_API_URL
+   Value: https://skill-platform-api.onrender.com
+4. Click "Create Variable"
+
+================================================================
+STEP 4: Deploy & Test
+================================================================
+
+1. Click "Manual Deploy" on each service
+2. Wait 3-5 minutes for first deploy
+3. Visit your URLs:
+
+   Frontend:  https://skill-platform-frontend.onrender.com
+   Backend:   https://skill-platform-api.onrender.com
+   API Docs:  https://skill-platform-api.onrender.com/docs
+
+================================================================
+🎉 Done! Your SIH project is live.
+
+================================================================
+📋 Quick Reference
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| Frontend | skill-platform-frontend.onrender.com | User interface |
+| Backend API | skill-platform-api.onrender.com | AI/ML services |
+| PostgreSQL | skill-platform-db.onrender.com | Database (free 90 days) |
+
+================================================================
+⚠️ Free Tier Reminders:
+- 750 hours/month per service
+- PostgreSQL: 90 days free, then $7/mo
+- Services spin down after 15 min inactivity
+- Cold start: 30-60 seconds on next request
+
+================================================================
+Need help? Visit: https://render.com/docs
+================================================================
